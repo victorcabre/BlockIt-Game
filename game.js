@@ -1,4 +1,4 @@
-let config = {
+let phaserConfig = {
     type: Phaser.AUTO,
     width: 600,
     height: 600,
@@ -12,10 +12,11 @@ let config = {
 let gameConfig = {
     boardSize: 9,
     boardColors: [0xeeeed2, 0x769656],
-    playerColors: [0xff0000, 0x0000FF]
-}
+    playerColors: [0xfe4c3c, 0x3498fc],
+    playerRadius: 22,
+};
 
-let game = new Phaser.Game(config);
+let game = new Phaser.Game(phaserConfig);
 
 /**
  * Represents a board, composed of multiple cells.
@@ -32,14 +33,14 @@ class Board {
         this.size = size;
         this.colors = colors;
 
-        let cell_width = config.width/this.size;
-        let cell_height = config.height/this.size;
+        let cell_width = phaserConfig.width/this.size;
+        let cell_height = phaserConfig.height/this.size;
 
         this.board = [];
         for (let i = 0; i < this.size; ++i) {
             let row = [];
             for (let j = 0; j < this.size; ++j) {
-                row.push(new Cell(scene, this.colors[(i + j) % 2], cell_width*i, cell_height*j, cell_width, cell_height));
+                row.push(new Cell(scene, this.colors[(i + j) % 2], cell_width*j, cell_height*i, cell_width, cell_height));
             }
             this.board.push(row)
         }
@@ -51,7 +52,7 @@ class Board {
      * @param {*} column 
      * @returns The cell at the specified row and column.
      */
-    getCell(row, column) {
+    getCellAt(row, column) {
         return this.board[row][column];
     }
 }
@@ -70,21 +71,29 @@ class Cell {
      * @param {*} height The height of the cell.
      */
     constructor(scene, color, pos_x, pos_y, width, height) {
-        this.cell = scene.add.rectangle(pos_x, pos_y, width, height, color).setOrigin(0,0)
+        this.rectangle = scene.add.rectangle(pos_x, pos_y, width, height, color).setOrigin(0, 0);
     }
 
-
+    getCenterCoords() {
+        return this.rectangle.getCenter()
+    }
 }
 
 /**
  * Represents a player.
  */
 class Player {
-    constructor(scene, color, pos_x, pos_y) {
-        this.pos_x = pos_x;
-        this.pos_y = pos_y;
+    constructor(scene, board, color, pos_i, pos_j) {
+        this.pos_i = pos_i;
+        this.pos_j = pos_j;
         this.color = color;
 
+        let cellCoords = board.getCellAt(pos_i, pos_j).getCenterCoords();
+        this.player = scene.add.circle(cellCoords.x, cellCoords.y, gameConfig.playerRadius, color);
+    }
+
+    move(direction) {
+        
     }
 }
 
@@ -93,22 +102,24 @@ const Directions = Object.freeze({
     Down: Symbol("Down"),
     Left: Symbol("Left"),
     Right: Symbol("Right"),
-})
+});
 
 
-function preload ()
+function preload()
 {
     
 }
 
-function create ()
+function create()
 {
-    board = new Board(this, gameConfig.boardSize, gameConfig.boardColors)
+    board = new Board(this, gameConfig.boardSize, gameConfig.boardColors);
+    player1 = new Player(this, board, gameConfig.playerColors[0], 0, Math.floor(gameConfig.boardSize / 2));
+    player2 = new Player(this, board, gameConfig.playerColors[1], gameConfig.boardSize - 1, Math.floor(gameConfig.boardSize / 2));
 
     
 }
 
-function update ()
+function update()
 {
     
 }
