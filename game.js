@@ -79,20 +79,73 @@ class Cell {
     }
 }
 
+class Position {
+    constructor(i, j) {
+        this.i = i;
+        this.j = j;
+    }
+
+    isWithinBounds() {
+        return (this.i >= 0 && this.i < gameConfig.boardSize) && (this.j >= 0 && this.j < gameConfig.boardSize);
+    }
+}
+
 /**
  * Represents a player.
  */
 class Player {
+    /**
+     * Construct a new player.
+     * @param {*} scene The Phaser.Scene object.
+     * @param {*} board The Board object.
+     * @param {*} color The color that will be used to draw the player's chips.
+     * @param {*} pos_i The starting row of the player in the board.
+     * @param {*} pos_i The starting column of the player in the board.
+     */
     constructor(scene, board, color, pos_i, pos_j) {
-        this.pos_i = pos_i;
-        this.pos_j = pos_j;
+        this.position = new Position(pos_i, pos_j);
         this.color = color;
+        let cellCoords = board.getCellAt(position.i, position.j).getCenterCoords();
+        this.player = scene.add.circle(cellCoords.x, cellCoords.y, gameConfig.playerRadius, this.color);
+    }
 
-        let cellCoords = board.getCellAt(pos_i, pos_j).getCenterCoords();
-        this.player = scene.add.circle(cellCoords.x, cellCoords.y, gameConfig.playerRadius, color);
+    canMove(direction) {
+        // TODO: Include barrier logic
+        let newPosition;
+        switch (direction) {
+            case Directions.Up:
+                newPosition = new Position(this.position.i, this.position.j - 1);
+                
+            case Directions.Down:
+                newPosition = new Position(this.position.i, this.position.j + 1);
+                
+            case Directions.Left:
+                newPosition = new Position(this.position.i - 1, this.position.j);
+
+            case Directions.Right:
+                newPosition = new Position(this.position.i + 1, this.position.j);
+        }
+
+        return newPosition.isWithinBounds();
     }
 
     move(direction) {
+        // TODO: Include opponent overtaking logic.
+        let newPosition;
+        switch (direction) {
+            case Directions.Up:
+                newPosition = new Position(this.position.i, this.position.j - 1);
+                
+            case Directions.Down:
+                newPosition = new Position(this.position.i, this.position.j + 1);
+                
+            case Directions.Left:
+                newPosition = new Position(this.position.i - 1, this.position.j);
+
+            case Directions.Right:
+                newPosition = new Position(this.position.i + 1, this.position.j);
+        }
+
         
     }
 }
@@ -110,13 +163,15 @@ function preload()
     
 }
 
+let board;
+let player1;
+let player2;
+
 function create()
 {
     board = new Board(this, gameConfig.boardSize, gameConfig.boardColors);
     player1 = new Player(this, board, gameConfig.playerColors[0], 0, Math.floor(gameConfig.boardSize / 2));
     player2 = new Player(this, board, gameConfig.playerColors[1], gameConfig.boardSize - 1, Math.floor(gameConfig.boardSize / 2));
-
-    
 }
 
 function update()
