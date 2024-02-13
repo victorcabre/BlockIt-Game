@@ -104,9 +104,13 @@ class Player {
      */
     constructor(scene, board, color, pos_i, pos_j) {
         this.position = new Position(pos_i, pos_j);
+        this.board = board;
         this.color = color;
-        let cellCoords = board.getCellAt(position.i, position.j).getCenterCoords();
-        this.player = scene.add.circle(cellCoords.x, cellCoords.y, gameConfig.playerRadius, this.color);
+        this.scene = scene;
+        let cellCoords = board.getCellAt(this.position.i, this.position.j).getCenterCoords();
+        this.circle = scene.add.circle(cellCoords.x, cellCoords.y, gameConfig.playerRadius, this.color);
+
+        
     }
 
     canMove(direction) {
@@ -114,39 +118,47 @@ class Player {
         let newPosition;
         switch (direction) {
             case Directions.Up:
-                newPosition = new Position(this.position.i, this.position.j - 1);
-                
-            case Directions.Down:
-                newPosition = new Position(this.position.i, this.position.j + 1);
-                
-            case Directions.Left:
                 newPosition = new Position(this.position.i - 1, this.position.j);
-
-            case Directions.Right:
+                break;
+            case Directions.Down:
                 newPosition = new Position(this.position.i + 1, this.position.j);
+                break;
+            case Directions.Left:
+                newPosition = new Position(this.position.i, this.position.j - 1);
+                break;
+            case Directions.Right:
+                newPosition = new Position(this.position.i, this.position.j + 1);
+                break;
         }
-
         return newPosition.isWithinBounds();
     }
 
     move(direction) {
         // TODO: Include opponent overtaking logic.
-        let newPosition;
         switch (direction) {
             case Directions.Up:
-                newPosition = new Position(this.position.i, this.position.j - 1);
-                
+                this.position = new Position(this.position.i - 1, this.position.j);
+                break;
             case Directions.Down:
-                newPosition = new Position(this.position.i, this.position.j + 1);
-                
+                this.position = new Position(this.position.i + 1, this.position.j);
+                break;
             case Directions.Left:
-                newPosition = new Position(this.position.i - 1, this.position.j);
-
+                this.position = new Position(this.position.i, this.position.j - 1);
+                break;
             case Directions.Right:
-                newPosition = new Position(this.position.i + 1, this.position.j);
+                this.position = new Position(this.position.i, this.position.j + 1);
+                break;
         }
-
-        
+        let cellCoords = board.getCellAt(this.position.i, this.position.j).getCenterCoords();
+        this.scene.tweens.add({
+            targets: this.circle,
+            duration: 300,
+            props: {
+                x: cellCoords.x,
+                y: cellCoords.y,
+            },
+            ease: 'Power1',
+        })
     }
 }
 
@@ -166,15 +178,62 @@ function preload()
 let board;
 let player1;
 let player2;
+let cursors;
+let keys;
 
 function create()
 {
     board = new Board(this, gameConfig.boardSize, gameConfig.boardColors);
     player1 = new Player(this, board, gameConfig.playerColors[0], 0, Math.floor(gameConfig.boardSize / 2));
     player2 = new Player(this, board, gameConfig.playerColors[1], gameConfig.boardSize - 1, Math.floor(gameConfig.boardSize / 2));
+    cursors = this.input.keyboard;
+    
+    keys = {
+        W: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
+        S: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.S),
+        A: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.A),
+        D: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.D),
+        Up: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.UP),
+        Down: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.DOWN),
+        Left: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.LEFT),
+        Right: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.RIGHT),
+    }
+
 }
 
 function update()
 {
-    
+    if (Phaser.Input.Keyboard.JustDown(keys.W) && player1.canMove(Directions.Up))
+    {
+        player1.move(Directions.Up)
+    }
+    else if (Phaser.Input.Keyboard.JustDown(keys.S) && player1.canMove(Directions.Down))
+    {
+        player1.move(Directions.Down)
+    }
+    else if (Phaser.Input.Keyboard.JustDown(keys.A) && player1.canMove(Directions.Left))
+    {
+        player1.move(Directions.Left)
+    }
+    else if (Phaser.Input.Keyboard.JustDown(keys.D) && player1.canMove(Directions.Right))
+    {
+        player1.move(Directions.Right)
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(keys.Up) && player2.canMove(Directions.Up))
+    {
+        player2.move(Directions.Up)
+    }
+    else if (Phaser.Input.Keyboard.JustDown(keys.Down) && player2.canMove(Directions.Down))
+    {
+        player2.move(Directions.Down)
+    }
+    else if (Phaser.Input.Keyboard.JustDown(keys.Left) && player2.canMove(Directions.Left))
+    {
+        player2.move(Directions.Left)
+    }
+    else if (Phaser.Input.Keyboard.JustDown(keys.Right) && player2.canMove(Directions.Right))
+    {
+        player2.move(Directions.Right)
+    }
 }
