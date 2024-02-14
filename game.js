@@ -109,7 +109,13 @@ class Player {
         
     }
 
-    canMove(direction) {
+    /**
+     * 
+     * @param {*} direction The direction for the movement.
+     * @param {*} enemyPlayerPosition The position of the enemy player.
+     * @returns The new position if the player can move that direction, null otherwise.
+     */
+    getMovePosition(direction, enemyPlayerPosition) {
         // TODO: Include barrier logic
         let newPosition;
         switch (direction) {
@@ -126,25 +132,17 @@ class Player {
                 newPosition = new Position(this.position.i, this.position.j + 1);
                 break;
         }
-        return newPosition.isWithinBounds();
+
+        if (newPosition.isWithinBounds()) {
+            return newPosition;
+        }
+        else {
+            return null;
+        }
     }
 
-    move(direction) {
-        // TODO: Include opponent overtaking logic.
-        switch (direction) {
-            case Directions.Up:
-                this.position = new Position(this.position.i - 1, this.position.j);
-                break;
-            case Directions.Down:
-                this.position = new Position(this.position.i + 1, this.position.j);
-                break;
-            case Directions.Left:
-                this.position = new Position(this.position.i, this.position.j - 1);
-                break;
-            case Directions.Right:
-                this.position = new Position(this.position.i, this.position.j + 1);
-                break;
-        }
+    move(newPosition) {
+        this.position = newPosition;
         let cellCoords = board.getCellAt(this.position.i, this.position.j).getCenterCoords();
         scene.tweens.add({
             targets: this.circle,
@@ -181,9 +179,8 @@ function create()
 {
     scene = this;
     board = new Board(gameConfig.boardSize, gameConfig.boardColors);
-    player1 = new Player(board, gameConfig.playerColors[0], 0, Math.floor(gameConfig.boardSize / 2));
-    player2 = new Player(board, gameConfig.playerColors[1], gameConfig.boardSize - 1, Math.floor(gameConfig.boardSize / 2));
-    
+    player1 = new Player(board, gameConfig.playerColors[1], gameConfig.boardSize - 1, Math.floor(gameConfig.boardSize / 2));
+    player2 = new Player(board, gameConfig.playerColors[0], 0, Math.floor(gameConfig.boardSize / 2));
 
     keys = {
         W: this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.W),
@@ -200,37 +197,54 @@ function create()
 
 function update()
 {
-    if (Phaser.Input.Keyboard.JustDown(keys.W) && player1.canMove(Directions.Up))
-    {
-        player1.move(Directions.Up)
+    if (Phaser.Input.Keyboard.JustDown(keys.W)) {
+        let position = player1.getMovePosition(Directions.Up);
+        if (position != null) {
+            player1.move(position);
+        }
     }
-    else if (Phaser.Input.Keyboard.JustDown(keys.S) && player1.canMove(Directions.Down))
-    {
-        player1.move(Directions.Down)
+    else if (Phaser.Input.Keyboard.JustDown(keys.A)) {
+        let position = player1.getMovePosition(Directions.Left);
+        if (position != null) {
+            player1.move(position);
+        }
     }
-    else if (Phaser.Input.Keyboard.JustDown(keys.A) && player1.canMove(Directions.Left))
-    {
-        player1.move(Directions.Left)
+    else if (Phaser.Input.Keyboard.JustDown(keys.S)) {
+        let position = player1.getMovePosition(Directions.Down);
+        if (position != null) {
+            player1.move(position);
+        }
     }
-    else if (Phaser.Input.Keyboard.JustDown(keys.D) && player1.canMove(Directions.Right))
-    {
-        player1.move(Directions.Right)
+    else if (Phaser.Input.Keyboard.JustDown(keys.D)) {
+        let position = player1.getMovePosition(Directions.Right);
+        if (position != null) {
+            player1.move(position);
+        }
     }
 
-    if (Phaser.Input.Keyboard.JustDown(keys.Up) && player2.canMove(Directions.Up))
-    {
-        player2.move(Directions.Up)
+    if (Phaser.Input.Keyboard.JustDown(keys.Up)) {
+        let position = player2.getMovePosition(Directions.Up);
+        if (position != null) {
+            player2.move(position);
+        }
     }
-    else if (Phaser.Input.Keyboard.JustDown(keys.Down) && player2.canMove(Directions.Down))
-    {
-        player2.move(Directions.Down)
+    else if (Phaser.Input.Keyboard.JustDown(keys.Left)) {
+        let position = player2.getMovePosition(Directions.Left);
+        if (position != null) {
+            player2.move(position);
+        }
     }
-    else if (Phaser.Input.Keyboard.JustDown(keys.Left) && player2.canMove(Directions.Left))
-    {
-        player2.move(Directions.Left)
+    else if (Phaser.Input.Keyboard.JustDown(keys.Down)) {
+        let position = player2.getMovePosition(Directions.Down);
+        if (position != null) {
+            player2.move(position);
+        }
     }
-    else if (Phaser.Input.Keyboard.JustDown(keys.Right) && player2.canMove(Directions.Right))
-    {
-        player2.move(Directions.Right)
+    else if (Phaser.Input.Keyboard.JustDown(keys.Right)) {
+        let position = player2.getMovePosition(Directions.Right);
+        if (position != null) {
+            player2.move(position);
+        }
     }
+
 }
