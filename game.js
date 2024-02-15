@@ -154,6 +154,8 @@ class Player {
     }
 
     move(newPosition) {
+        this.circle.depth = 1;
+        console.log(player1.circle.depth + ' ' + player2.circle.depth)
         this.position = newPosition;
         let cellCoords = board.getCellAt(this.position.i, this.position.j).getCenterCoords();
         scene.tweens.add({
@@ -164,8 +166,13 @@ class Player {
                 y: cellCoords.y,
             },
             ease: 'Power1',
+            onComplete: () => {
+                // Reset depth after animation completes
+                this.circle.depth = 0;
+            },
         })
     }
+    
 }
 
 const Directions = Object.freeze({
@@ -209,6 +216,7 @@ function create()
 
 function update()
 {
+    
     if (Phaser.Input.Keyboard.JustDown(keys.W)) {
         let position = player1.getMovePosition(Directions.Up, player2.getCurrentPosition());
         if (position != null) {
